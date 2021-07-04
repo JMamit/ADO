@@ -147,5 +147,3 @@ function tableClick(e) {
 }
 
 
-document.getElementById('getTable').addEventListener('click',getTable);
-
