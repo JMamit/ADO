@@ -143,7 +143,9 @@ function tableClick(e) {
 
 function getTable(){
   chrome.storage.sync.get('myTable',function(data){
-    tableEL.innerHTML = data.myTable;
+    if(data){
+      tableEL.innerHTML = data.myTable;
+    }
   });
 }
 
