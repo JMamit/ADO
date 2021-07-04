@@ -33,6 +33,11 @@ function getAuthToken(code_get) {
    token = json.access_token;
   switchPage(1);
   //fetch_data(token);
+  chrome.storage.sync.get('myTable',function(data){
+    if(data){
+      tableEL.innerHTML = data.myTable;
+    }
+  });
 })
 .catch(err => console.log(err));
 
@@ -141,13 +146,6 @@ function tableClick(e) {
   chrome.storage.sync.set({'myTable': tableEL.innerHTML});
 }
 
-function getTable(){
-  chrome.storage.sync.get('myTable',function(data){
-    if(data){
-      tableEL.innerHTML = data.myTable;
-    }
-  });
-}
 
 document.getElementById('getTable').addEventListener('click',getTable);
 
