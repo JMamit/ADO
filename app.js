@@ -42,11 +42,11 @@ function getAuthToken(code_get) {
 .catch(err => console.log(err));
 
 };
-function fetch_data(token,orgName,projName) {
+async function fetch_data(token,orgName,projName,id) {
   const apiConfig = {
-    endpoint: "https://dev.azure.com/"+orgName+"/"+projName+"/_apis/wit/workitems?ids=2&api-version=6.0",
+    endpoint: "https://dev.azure.com/"+orgName+"/"+projName+"/_apis/wit/workitems?ids="+id+"&api-version=6.0",
     scopes: ["499b84ac-1321-427f-aa17-267ca6975798/.default"] // do not change this value
-};
+  };
   const headers = new Headers();
   const bearer = `Bearer ${token}`;
   headers.append("Authorization", bearer);
@@ -56,14 +56,52 @@ function fetch_data(token,orgName,projName) {
       headers: headers,
   };
   //logMessage('Calling web API...');
-  fetch(apiConfig.endpoint, options)
+  await fetch(apiConfig.endpoint, options)
       .then(response => response.json())
       .then(response => {
-          console.log(response);
+          console.log(id,response);
+          return response;
       }).catch(error => {
           console.error(error);
       });
 
+}
+async function fetchData(token,orgName,projName){
+  // var dummy = fetch_data(token,orgName,projName,5);
+  // console.log("dummmy1",dummy);
+  // var dummy2 =fetch_data(token,orgName,projName,6);
+  //  console.log("dummy2",dummy2);
+
+  let i = 1;
+  do{
+    const apiConfig = {
+      endpoint: "https://dev.azure.com/"+orgName+"/"+projName+"/_apis/wit/workitems?ids="+i+"&api-version=6.0",
+      scopes: ["499b84ac-1321-427f-aa17-267ca6975798/.default"] // do not change this value
+    };
+    const headers = new Headers();
+    const bearer = `Bearer ${token}`;
+    headers.append("Authorization", bearer);
+    const res  = { query: "Select [System.Id], [System.Title], [System.State] From WorkItems Where [System.WorkItemType] = 'Bug' order by [Microsoft.VSTS.Common.Priority] asc, [System.CreatedDate] desc"};
+    const options = {
+        method: "GET",
+        headers: headers,
+    };
+    //logMessage('Calling web API...');
+    await fetch(apiConfig.endpoint, options)
+        .then(response => response.json())
+        .then(response => {
+            console.log(i,response);
+            if(response.count){
+              i++;
+            }
+            else{
+              i=0;
+            }
+        }).catch(error => {
+            console.error(error);
+        });
+  }
+  while(i!=0)
 }
 
 //event listener for sign in
@@ -133,9 +171,10 @@ function tableClick(e) {
     var rowIndex = e.path[0].parentNode.parentNode.rowIndex;
     var orgName = tableEL.rows[rowIndex].cells[0].innerHTML
     var projName = tableEL.rows[rowIndex].cells[1].innerHTML
-    console.log(tableEL.rows[rowIndex].cells[0].innerHTML);
-    console.log(tableEL.rows[rowIndex].cells[1].innerHTML);
-    fetch_data(token,orgName,projName);
+    // console.log(tableEL.rows[rowIndex].cells[0].innerHTML);
+    // console.log(tableEL.rows[rowIndex].cells[1].innerHTML);
+    //fetch_data(token,orgName,projName,1);
+    fetchData(token,orgName,projName);
     switchPage(2);
   }
   if (e.target.classList.contains("deleteProj")) {
